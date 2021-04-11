@@ -1,0 +1,4 @@
+- inputs: matrix_a, matrix_b
+- output: matrix_result
+- function
+    -- matrix_result = (matrix_a >> 8) & 0x000000FF

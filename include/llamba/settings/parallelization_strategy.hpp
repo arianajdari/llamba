@@ -1,0 +1,11 @@
+#ifndef __PARALLELIZATION_STRATEGY_HPP__
+#define __PARALLELIZATION_STRATEGY_HPP__
+
+namespace PARALLELIZATION_STRATEGY
+{
+    int PTHREADS = 0;
+    int OPENMP   = 1;
+    int SERIAL   = 2;
+}
+
+#endif
