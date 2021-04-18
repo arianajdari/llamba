@@ -7,7 +7,7 @@
 #define DATA_TYPE int
 #define DATA_SIZE 500
 
-void complex_channel_serial(const std::vector<DATA_TYPE>& matrix_a, const std::vector<DATA_TYPE>& matrix_b, std::vector<DATA_TYPE>& result_serial)
+void grayscale_channel_serial(const std::vector<DATA_TYPE>& matrix_a, const std::vector<DATA_TYPE>& matrix_b, std::vector<DATA_TYPE>& result_serial)
 {
   for(int i = 0; i < DATA_SIZE; i++)
   {
@@ -43,7 +43,7 @@ int main()
   auto result_serial   = llamba::single_generator::generate_input_zero<DATA_TYPE>(DATA_SIZE);
   auto result_parallel = llamba::single_generator::generate_input_zero<DATA_TYPE>(DATA_SIZE);
 
-  complex_channel_serial(matrix_a, matrix_b, result_serial);
+  grayscale_channel_serial(matrix_a, matrix_b, result_serial);
 
   llamba::base::grayscale_parallel<DATA_TYPE> grayscale_parallel_ = 
     llamba::base::grayscale_parallel<DATA_TYPE>(matrix_a, matrix_b, result_parallel, llamba::settings::make_settings());

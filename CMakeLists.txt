@@ -30,7 +30,7 @@ add_executable(multiplication_benchmark src/multiplication_benchmark.cpp)
 add_executable(summation_benchmark src/summation_benchmark.cpp)
 add_executable(abstraction_benchmark src/abstraction_benchmark.cpp)
 
-add_executable(ros_multiplication_benchmark src/ros_multiplication_benchmark.cpp)
+add_executable(ros_benchmarks src/ros_benchmarks.cpp)
 
 add_executable(multiply_parallel_test tests/multiply_parallel_test.cpp)
 add_executable(sum_parallel_test tests/sum_parallel_test.cpp)
@@ -101,14 +101,14 @@ target_include_directories(abstraction_benchmark PUBLIC include)
 target_link_libraries(abstraction_benchmark   "${OpenMP_CXX_FLAGS}" Eigen3::Eigen)
 target_compile_options(abstraction_benchmark PUBLIC  "${OpenMP_CXX_FLAGS}")
 
-target_include_directories(ros_multiplication_benchmark PUBLIC include)
-target_link_libraries(ros_multiplication_benchmark   "${OpenMP_CXX_FLAGS}" Eigen3::Eigen)
-target_compile_options(ros_multiplication_benchmark PUBLIC  "${OpenMP_CXX_FLAGS}")
-ament_target_dependencies(ros_multiplication_benchmark rclcpp std_msgs)
+target_include_directories(ros_benchmarks PUBLIC include)
+target_link_libraries(ros_benchmarks   "${OpenMP_CXX_FLAGS}" Eigen3::Eigen)
+target_compile_options(ros_benchmarks PUBLIC  "${OpenMP_CXX_FLAGS}")
+ament_target_dependencies(ros_benchmarks rclcpp std_msgs)
 
 
 install(TARGETS
-  ros_multiplication_benchmark
+  ros_benchmarks
   multiplication_benchmark
   sum_parallel_test
   multiply_parallel_test
