@@ -75,6 +75,14 @@ struct settings
             return settings_;
         }
 
+        static settings make_settings(int thread_number_, int sched_strategy_, int priority_, bool affinity_, int parallelization_strategy_)
+        {
+            settings settings_ =
+                settings(thread_number_, sched_strategy_, priority_, affinity_, parallelization_strategy_);
+            
+            return settings_;
+        }
+
         int  THREAD_NUMBER;
         int  SCHED_STRATEGY;
         int  PRIORITY;
