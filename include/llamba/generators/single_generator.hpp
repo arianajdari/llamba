@@ -25,6 +25,14 @@ class single_generator
 
             return temp;
         }
+
+        template<typename T = int>
+        static std::vector<T> generate_input_zero(int size)
+        {
+            std::vector<T> temp(size * size);
+
+            return temp;
+        }
 };
 
 }

@@ -16,6 +16,7 @@ namespace llamba
 struct settings
 {
     public:
+        
         settings() 
         {
             this->THREAD_NUMBER            =     2_THREADS;
@@ -64,6 +65,22 @@ struct settings
             PARALLELIZATION_STRATEGY(parallelization_strategy_)
         {
 
+        }
+
+        static settings make_settings()
+        {
+            settings settings_ =
+                settings(4_THREADS, PARALLELIZATION_STRATEGY::PTHREADS);
+
+            return settings_;
+        }
+
+        static settings make_settings(int thread_number_, int sched_strategy_, int priority_, bool affinity_, int parallelization_strategy_)
+        {
+            settings settings_ =
+                settings(thread_number_, sched_strategy_, priority_, affinity_, parallelization_strategy_);
+            
+            return settings_;
         }
 
         int  THREAD_NUMBER;
