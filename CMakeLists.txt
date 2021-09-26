@@ -32,9 +32,10 @@ add_executable(abstraction_benchmark src/abstraction_benchmark.cpp)
 add_executable(ros_benchmarks src/ros_benchmarks.cpp)
 add_executable(bresenham_benchmark src/bresenham_benchmark.cpp)
 add_executable(odometry_benchmark src/odometry_benchmark.cpp)
-add_executable(staticmap_benchmark src/odometry_benchmark.cpp)
+add_executable(staticmap_benchmark src/staticmap_benchmark.cpp)
 add_executable(forward_benchmark src/forward_benchmark.cpp)
 add_executable(inversion_benchmark src/inversion_benchmark.cpp)
+add_executable(grayscale_benchmark src/grayscale_benchmark.cpp)
 
 add_executable(multiply_parallel_test tests/multiply_parallel_test.cpp)
 add_executable(sum_parallel_test tests/sum_parallel_test.cpp)
@@ -47,6 +48,9 @@ add_executable(adjoint_parallel_test tests/adjoint_parallel_test.cpp)
 add_executable(determinant_parallel_test tests/determinant_parallel_test.cpp)
 add_executable(complex_parallel_test tests/complex_parallel_test.cpp)
 add_executable(grayscale_parallel_test tests/grayscale_parallel_test.cpp)
+
+
+
 
 target_include_directories(multiply_parallel_test PUBLIC include)
 target_link_libraries(multiply_parallel_test   "${OpenMP_CXX_FLAGS}")
@@ -92,7 +96,6 @@ target_include_directories(grayscale_parallel_test PUBLIC include)
 target_link_libraries(grayscale_parallel_test   "${OpenMP_CXX_FLAGS}")
 target_compile_options(grayscale_parallel_test PUBLIC  "${OpenMP_CXX_FLAGS}")
 
-
 target_include_directories(multiplication_benchmark PUBLIC include)
 target_link_libraries(multiplication_benchmark   "${OpenMP_CXX_FLAGS}" Eigen3::Eigen)
 target_compile_options(multiplication_benchmark PUBLIC  "${OpenMP_CXX_FLAGS}")
@@ -125,6 +128,10 @@ target_include_directories(inversion_benchmark PUBLIC include)
 target_link_libraries(inversion_benchmark   "${OpenMP_CXX_FLAGS}" Eigen3::Eigen)
 target_compile_options(inversion_benchmark PUBLIC  "${OpenMP_CXX_FLAGS}")
 
+target_include_directories(grayscale_benchmark PUBLIC include)
+target_link_libraries(grayscale_benchmark   "${OpenMP_CXX_FLAGS}" Eigen3::Eigen)
+target_compile_options(grayscale_benchmark PUBLIC  "${OpenMP_CXX_FLAGS}")
+
 target_include_directories(ros_benchmarks PUBLIC include)
 target_link_libraries(ros_benchmarks   "${OpenMP_CXX_FLAGS}" Eigen3::Eigen)
 target_compile_options(ros_benchmarks PUBLIC  "${OpenMP_CXX_FLAGS}")
@@ -152,6 +159,7 @@ install(TARGETS
   staticmap_benchmark
   forward_benchmark
   inversion_benchmark
+  grayscale_benchmark
   DESTINATION lib/${PROJECT_NAME}
 )
 

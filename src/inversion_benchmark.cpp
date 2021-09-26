@@ -9,11 +9,13 @@
 #include<pthread.h>
 #include<sched.h>
 
-#define SIZE 1000000
+#define SIZE 100
 #define RANK_100 100
 #define RANK_200 200
 #define RANK_400 400
 #define RANK_800 800
+
+#define RANK_3 3
 
 #define THREAD_POOL 10
 #define THREAD_NUMBER 4
@@ -64,6 +66,141 @@ void * pool_thread_worker(void * arg__)
 
   return NULL;
 }
+
+
+void inversion3Serial(float ** a)
+{
+  float ratio;
+  int i,j,k;
+
+  for(i=1;i<=RANK_3;i++)
+  {
+    for(j=1;j<=RANK_3;j++)
+    {
+        if(i==j)
+        {
+          a[i][j+RANK_3] = 1;
+        }
+        else
+        {
+          a[i][j+RANK_3] = 0;
+        }
+    }
+  }
+
+  /* Applying Gauss Jordan Elimination */
+  for(i=1;i<=RANK_3;i++)
+  {
+    for(j=1;j<=RANK_3;j++)
+    {
+      if(i!=j)
+      {
+        ratio = a[j][i]/a[i][i];
+        for(k=1;k<=2*RANK_3;k++)
+        {
+          a[j][k] = a[j][k] - ratio*a[i][k];
+        }
+      }
+    }
+  }
+  /* Row Operation to Make Principal Diagonal to 1 */
+  for(i=1;i<=RANK_3;i++)
+  {
+    for(j=RANK_3+1;j<=2*RANK_3;j++)
+    {
+      a[i][j] = a[i][j]/a[i][i];
+    }
+  }
+
+  std::cout<< std::endl<<"Inverse Matrix is:"<< std::endl;
+  for(i=1;i<=RANK_3;i++)
+  {
+    for(j=RANK_3+1;j<=2*RANK_3;j++)
+    {
+      std::cout<< a[i][j]<<"\t";
+    }
+    std::cout<< std::endl;
+  }
+
+}
+void inversion3Multithread(float **  matrix) 
+{
+  inversion_struct  settings_ = inversion_struct([](iterators * iterators_) -> void {
+    float ratio;
+    int i,j,k;
+
+    for(i=iterators_->i;i<=iterators_->j;i++)
+    {
+      for(j=1;j<=iterators_->j;j++)
+      {
+          if(i==j)
+          {
+            iterators_->matrix[i][j+iterators_->rank] = 1;
+          }
+          else
+          {
+            iterators_->matrix[i][j+iterators_->rank] = 0;
+          }
+      }
+    }
+
+    for(i=iterators_->i;i<=iterators_->j;i++)
+    {
+      for(j=iterators_->i;j<=iterators_->rank;j++)
+      {
+        if(i!=j)
+        {
+          ratio = iterators_->matrix[j][i]/iterators_->matrix[i][i];
+          for(k=1;k<=2*iterators_->j;k++)
+          {
+            iterators_->matrix[j][k] = iterators_->matrix[j][k] - ratio*iterators_->matrix[i][k];
+          }
+        }
+      }
+    }
+    /* Row Operation to Make Principal Diagonal to 1 */
+    for(i=iterators_->i;i<=iterators_->j;i++)
+    {
+      for(j=iterators_->rank+1;j<=2*iterators_->rank;j++)
+      {
+        iterators_->matrix[i][j] = iterators_->matrix[i][j]/iterators_->matrix[i][i];
+      }
+    }
+
+    
+    
+  }, THREAD_NUMBER); 
+
+  iterators *iterators_1 = new iterators(matrix, 0, (RANK_3 / 3), RANK_3); 
+  iterators *iterators_2 = new iterators(matrix, (RANK_3 / 3), (RANK_3 / 3) * 2, RANK_3);
+  iterators *iterators_3 = new iterators(matrix, (RANK_3 / 3) * 2, RANK_3, RANK_3); 
+
+  std::pair<inversion_struct, iterators*> * p1 = new std::pair<inversion_struct, iterators*>(settings_,iterators_1);
+  std::pair<inversion_struct, iterators*> * p2 = new std::pair<inversion_struct, iterators*>(settings_,iterators_2);
+  std::pair<inversion_struct, iterators*> * p3 = new std::pair<inversion_struct, iterators*>(settings_,iterators_3);
+  
+  auto before = std::chrono::high_resolution_clock::now();
+  tasks[0] = p1;
+ 
+  tasks[1] = p2;
+  
+  tasks[2] = p3;
+
+  while(true) 
+  {
+      if( tasks[0]->first.is_finished && tasks[1]->first.is_finished && tasks[2]->first.is_finished)
+      {
+          break;
+      }
+  };
+  auto after = std::chrono::high_resolution_clock::now();
+
+
+
+  std::cout << std::chrono::duration_cast<std::chrono::duration<int64_t, TIME_MEASUREMENT >>(after-before).count() << std::endl;
+}
+
+
 
 void inversion100Serial(float ** a)
 {
@@ -726,6 +863,59 @@ void inversion800Multithread(float **  matrix)
 }
 
 
+void benchmarks3Serial()
+{
+  float ** matrix3 = new float*[10];
+
+   for(int i = 0; i < 10; i++)
+    matrix3[i] = new float[10]; 
+
+  matrix3[1][1]= 1;
+  matrix3[1][2]= 1;
+  matrix3[1][3]= 3;
+  matrix3[2][1]= 1;
+  matrix3[2][2]= 3;
+  matrix3[2][3]= -3;
+  matrix3[3][1]= -2;
+  matrix3[3][2]= -4;
+  matrix3[3][3]= -4;
+
+  inversion3Serial(matrix3);
+
+}
+
+void benchmarks3Multithreading()
+{
+  float ** matrix3 = new float*[10];
+
+   for(int i = 0; i < 10; i++)
+    matrix3[i] = new float[10]; 
+
+  matrix3[1][1]= 1;
+  matrix3[1][2]= 1;
+  matrix3[1][3]= 3;
+  matrix3[2][1]= 1;
+  matrix3[2][2]= 3;
+  matrix3[2][3]= -3;
+  matrix3[3][1]= -2;
+  matrix3[3][2]= -4;
+  matrix3[3][3]= -4;
+
+  inversion3Multithread(matrix3);
+
+  for(int i=1;i<=RANK_3;i++)
+  {
+    for(int j=RANK_3+1;j<=2*RANK_3;j++)
+    {
+      std::cout<< matrix3[i][j]<<"\t";
+    }
+    std::cout<< std::endl;
+  }
+
+
+}
+
+
 void benchmarks100Serial() 
 {
   std::ifstream ifs100("matrix_100x100.txt", std::ios::in);
@@ -1066,6 +1256,8 @@ int main()
   {
       pthread_detach(threads[i]);
   }  
+
+  benchmarks3Multithreading();
 
   //benchmarks100Serial();
   //benchmarks100OpenMP();

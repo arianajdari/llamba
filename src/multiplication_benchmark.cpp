@@ -8,17 +8,17 @@
 #include <memory>
 #include <thread>
 #include <mutex>
+#include <sched.h>
 #include <llamba/base/multiply_parallel.hpp>
 #include <llamba/generators/single_generator.hpp>
 
 #include "Eigen/Dense"
 
-#define THREAD_POOL 10
+#define THREAD_POOL 4
 #define THREAD_NUMBER_ 4
 
 #define DATA_SIZE 800
 #define ITERATION_NUMBER 1
-
 typedef std::milli TIME_MEASUREMENT;
 
 std::mutex mutexes[THREAD_POOL];
@@ -239,14 +239,27 @@ unsigned long int standard_deviation(const std::vector<unsigned long int>& value
 
 int main() 
 {
+
+    cpu_set_t cpuset;
+    int cpu_counter = 0;
+    struct sched_param  sched_param_;
+    sched_param_.sched_priority = 80;
+
     pthread_t threads[THREAD_POOL];
 
     for(int i = 0; i < THREAD_POOL; i++)
     {
+        CPU_ZERO(&cpuset);
         int* arg = new int;
         *arg = i;
         a[i] = NULL;
+        CPU_SET(cpu_counter, &cpuset);
+        
         pthread_create(&threads[i], NULL, pool_thread_worker, (void*)arg);
+         
+     pthread_setschedparam(*(threads + i), 0, &sched_param_);
+   // pthread_setaffinity_np(*(threads + i), sizeof(cpuset), &cpuset);
+        cpu_counter += 2;
     }
 
     for(int i = 0; i < THREAD_POOL; i++)
@@ -261,7 +274,7 @@ int main()
     pthread_detach(thread_check);
 
 
-
+    std::vector<unsigned long int> serial_times;
     std::vector<unsigned long int> eigen_times;
     std::vector<unsigned long int> llamba_times;
     std::vector<unsigned long int> llamba_threadpool_times;
@@ -273,7 +286,17 @@ int main()
     auto matrix_a  = llamba::single_generator::generate_input<double>(DATA_SIZE);
     auto matrix_b  = llamba::single_generator::generate_input<double>(DATA_SIZE);
     llamba::settings settings_ = llamba::settings(4_THREADS, PARALLELIZATION_STRATEGY::PTHREADS);
-    llamba::settings settings_serial = llamba::settings(4_THREADS, PARALLELIZATION_STRATEGY::OPENMP);
+    llamba::settings settings_openmp = llamba::settings(4_THREADS, PARALLELIZATION_STRATEGY::OPENMP);
+    llamba::settings settings_serial = llamba::settings(PARALLELIZATION_STRATEGY::SERIAL);
+/*
+    for(int i = 0; i < ITERATION_NUMBER; i++)
+    {
+        auto result  = llamba::single_generator::generate_input_zero<double>(DATA_SIZE);
+        auto before = std::chrono::high_resolution_clock::now();
+        llamba::base::multiply_parallel<double> multiply = llamba::base::multiply_parallel<double>(matrix_a, matrix_b, result, settings_openmp);
+        auto after = std::chrono::high_resolution_clock::now();
+        openmp_times.push_back(std::chrono::duration_cast<std::chrono::duration<int64_t, TIME_MEASUREMENT > >(after - before).count());
+    }
 
     for(int i = 0; i < ITERATION_NUMBER; i++)
     {
@@ -281,9 +304,9 @@ int main()
         auto before = std::chrono::high_resolution_clock::now();
         llamba::base::multiply_parallel<double> multiply = llamba::base::multiply_parallel<double>(matrix_a, matrix_b, result, settings_serial);
         auto after = std::chrono::high_resolution_clock::now();
-        openmp_times.push_back(std::chrono::duration_cast<std::chrono::duration<int64_t, TIME_MEASUREMENT > >(after - before).count());
+        serial_times.push_back(std::chrono::duration_cast<std::chrono::duration<int64_t, TIME_MEASUREMENT > >(after - before).count());
     }
-    
+    */
     for(int i = 0; i < ITERATION_NUMBER; i++)
     {
         auto result  = llamba::single_generator::generate_input_zero<double>(DATA_SIZE);
@@ -293,6 +316,7 @@ int main()
         llamba_times.push_back(std::chrono::duration_cast<std::chrono::duration<int64_t, TIME_MEASUREMENT > >(after - before).count());
     }
 
+/*
     for(int i = 0; i < ITERATION_NUMBER; i++)
     {
         auto before = std::chrono::high_resolution_clock::now();
@@ -301,6 +325,8 @@ int main()
         eigen_times.push_back(std::chrono::duration_cast<std::chrono::duration<int64_t, TIME_MEASUREMENT > >(after - before).count());
     }
 
+*/    
+
     for(int i = 0; i < ITERATION_NUMBER; i++)
     {
         llamba_threadpool_times.push_back(multiplication());
@@ -308,17 +334,15 @@ int main()
 
     std::cout << "Multiplication Benchmark -- Matrix Size: (" << DATA_SIZE << "x" << DATA_SIZE << ")" << std::endl << std::endl;
 
-    std::cout << "Eigen  times after     " << ITERATION_NUMBER << " iterations (average): " << average(eigen_times) << "ms" << std::endl;
-    std::cout << "Llamba times after     " << ITERATION_NUMBER << " iterations (average): " << average(llamba_times) << "ms" << std::endl; 
-    std::cout << "OpenMP times after     " << ITERATION_NUMBER << " iterations (average): " << average(openmp_times) << "ms" << std::endl;
+    
+    std::cout << "Serial  times after " << ITERATION_NUMBER << " iterations (average): " << average(serial_times) << "ms" << std::endl;
+    std::cout << "Llamba  times after " << ITERATION_NUMBER << " iterations (average): " << average(llamba_times) << "ms" << std::endl;
+    std::cout << "Eigen                  " << ITERATION_NUMBER << " iterations (average): " << average(eigen_times) << "ms" << std::endl;
+    std::cout << "OpenMP                 " << ITERATION_NUMBER << " iterations (average): " << average(openmp_times) << "ms" << std::endl;
     std::cout << "Llamba PTH times after " << ITERATION_NUMBER << " iterations (average): " << average(llamba_threadpool_times) << "ms" << std::endl;
 
     std::cout << std::endl;
 
-    std::cout << "Eigen  times after     " << ITERATION_NUMBER << " iterations (standard deviation): " << standard_deviation(eigen_times) << "ms" << std::endl;
-    std::cout << "Llamba times after     " << ITERATION_NUMBER << " iterations (standard deviation): " << standard_deviation(llamba_times) << "ms" << std::endl; 
-    std::cout << "OpenMP times after     " << ITERATION_NUMBER << " iterations (standard deviation): " << standard_deviation(openmp_times) << "ms" << std::endl; 
-    std::cout << "Llamba PTH times after " << ITERATION_NUMBER << " iterations (standard deviation): " << standard_deviation(llamba_threadpool_times) << "ms" << std::endl;
 
 
     std::cout << std::endl << "Press ctrl+c to exit the program...";
