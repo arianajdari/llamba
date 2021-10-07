@@ -321,8 +321,8 @@ void init_thread_pool()
         tasks[i] = NULL;
         pthread_create(&threads[i], NULL, pool_thread_worker, (void*)arg);
         CPU_SET(cpu_counter, &cpuset);
-   //  pthread_setaffinity_np(*(threads + i), sizeof(cpuset), &cpuset);        
-    // pthread_setschedparam(*(threads + i),0, &sched_param_);
+        pthread_setaffinity_np(*(threads + i), sizeof(cpuset), &cpuset);        
+        pthread_setschedparam(*(threads + i),0, &sched_param_);
         CPU_CLR(cpu_counter, &cpuset);
         cpu_counter += 2;
     }

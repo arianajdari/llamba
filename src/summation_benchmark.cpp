@@ -11,7 +11,7 @@
 
 #include "Eigen/Dense"
 
-#define DATA_SIZE 4000
+#define DATA_SIZE 8000
 #define ITERATION_NUMBER 5
 
 #define THREAD_POOL 4
@@ -213,6 +213,29 @@ void serialSummation(std::vector<double>& result, const std::vector<double>& mat
 }
 
 
+void calculate(std::vector<unsigned long int>& times, const int & steps, const char * str)
+{
+    double min = times[0];
+    double max = times[0];
+
+    double average = 0.0;
+    int length = times.size();
+
+    for(int i = 0; i < length; i++) {
+        if(min > times[i])
+            min = times[i];
+        if(max < times[i])
+            max = times[i];
+        
+        average += times[i];
+    } 
+
+    std::cout << "Multiplication " << str << " - " << steps << " steps" << std::endl
+              << "min: " << min << " max: " << max <<  " avg: " << average/length << std::endl << std::endl;
+
+}
+
+
 double average(const std::vector<unsigned long int>& values)
 {
     double average = 0.0;
@@ -261,9 +284,9 @@ int main()
         
         pthread_create(&threads[i], NULL, pool_thread_worker, (void*)arg);
          
-     // pthread_setschedparam(*(threads + i), 0, &sched_param_);
+        pthread_setschedparam(*(threads + i), 0, &sched_param_);
         pthread_setaffinity_np(*(threads + i), sizeof(cpuset), &cpuset);
-        cpu_counter += 1;
+        cpu_counter += 2;
     }
 
     for(int i = 0; i < THREAD_POOL; i++)
@@ -284,7 +307,6 @@ int main()
     std::vector<unsigned long int> llamba_times;
 
 
-
     Eigen::MatrixXd a = Eigen::MatrixXd::Random(DATA_SIZE, DATA_SIZE);
     Eigen::MatrixXd b = Eigen::MatrixXd::Random(DATA_SIZE, DATA_SIZE);
 
@@ -303,7 +325,7 @@ int main()
         auto after = std::chrono::high_resolution_clock::now();
         openmp_times.push_back(std::chrono::duration_cast<std::chrono::duration<int64_t, TIME_MEASUREMENT > >(after - before).count());
     }
-/*
+
     for(int i = 0; i < ITERATION_NUMBER; i++)
     {
         auto result  = llamba::single_generator::generate_input_zero<double>(DATA_SIZE);
@@ -312,7 +334,7 @@ int main()
         auto after = std::chrono::high_resolution_clock::now();
         serial_times.push_back(std::chrono::duration_cast<std::chrono::duration<int64_t, TIME_MEASUREMENT > >(after - before).count());
     }
-*/
+
 
     for(int i = 0; i < ITERATION_NUMBER; i++)
     {
@@ -329,7 +351,7 @@ int main()
         llamba_threadpool_times.push_back(multiplication());
     }
 
-  /*
+  
      for(int i = 0; i < ITERATION_NUMBER; i++)
     {
         auto result  = llamba::single_generator::generate_input_zero<double>(DATA_SIZE);
@@ -338,8 +360,8 @@ int main()
         auto after = std::chrono::high_resolution_clock::now();
         serial_times.push_back(std::chrono::duration_cast<std::chrono::duration<int64_t, TIME_MEASUREMENT > >(after - before).count());
     }
-*/
-/*
+
+
     for(int i = 0; i < ITERATION_NUMBER; i++)
     {
         auto before = std::chrono::high_resolution_clock::now();
@@ -348,14 +370,16 @@ int main()
         eigen_times.push_back(std::chrono::duration_cast<std::chrono::duration<int64_t, TIME_MEASUREMENT > >(after - before).count());
     }
 
-*/
+
     std::cout << "Summation Benchmark -- Matrix Size: (" << DATA_SIZE << "x" << DATA_SIZE << ")" << std::endl << std::endl;
 
-//    std::cout << "Serial  times after "    << ITERATION_NUMBER << " iterations (average): " << average(serial_times) << "ms" << std::endl;
-    std::cout << "Llamba  times after "    << ITERATION_NUMBER << " iterations (average): " << average(llamba_times) << "ms" << std::endl;
-    std::cout << "Eigen                  " << ITERATION_NUMBER << " iterations (average): " << average(eigen_times) << "ms" << std::endl;
-    std::cout << "OpenMP                 " << ITERATION_NUMBER << " iterations (average): " << average(openmp_times) << "ms" << std::endl;
-    std::cout << "Llamba PTH times after " << ITERATION_NUMBER << " iterations (average): " << average(llamba_threadpool_times) << "ms" << std::endl;
+    calculate(serial_times, ITERATION_NUMBER, "Serial");
+    calculate(llamba_times, ITERATION_NUMBER, "LLAMBA");
+    calculate(eigen_times, ITERATION_NUMBER, "Eigen");
+    calculate(openmp_times, ITERATION_NUMBER, "OpenMP");
+    calculate(llamba_threadpool_times, ITERATION_NUMBER, "LLAMBA");
+
+
 
     std::cout << std::endl;
  
