@@ -18,7 +18,7 @@
 #define THREAD_NUMBER_ 4
 
 #define DATA_SIZE 800
-#define ITERATION_NUMBER 4
+#define ITERATION_NUMBER 5
 typedef std::milli TIME_MEASUREMENT;
 
 std::mutex mutexes[THREAD_POOL];
@@ -278,8 +278,8 @@ int main()
         
         pthread_create(&threads[i], NULL, pool_thread_worker, (void*)arg);
          
-        pthread_setschedparam(*(threads + i), 0, &sched_param_);
-        pthread_setaffinity_np(*(threads + i), sizeof(cpuset), &cpuset);
+       //pthread_setschedparam(*(threads + i), 0, &sched_param_);
+       pthread_setaffinity_np(*(threads + i), sizeof(cpuset), &cpuset);
         cpu_counter += 2;
     }
 

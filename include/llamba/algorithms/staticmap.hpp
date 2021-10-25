@@ -30,17 +30,18 @@ struct iterators
 {
   iterators(
     uint8_t *& costs_,
-    int size_y,
-    int size_x  
+    int size_x,
+    int size_y
   ) :
     costs_(costs_),
-    size_y(size_y),
-    size_x(size_x) 
+    size_x(size_x),
+    size_y(size_y) 
   { }
 
   uint8_t *& costs_;
-  int size_y;
   int size_x;
+  int size_y;
+  
 };
 
 struct staticmap_struct
@@ -90,7 +91,7 @@ uint8_t interpret_value(const int8_t value)
   return static_cast<uint8_t>(scale * 200);
 }
 
-void staticMapUpdate()
+unsigned long int staticMapUpdate()
 {
   uint8_t * costs_ = new uint8_t[SIZE_Y * SIZE_X];
 
@@ -120,10 +121,10 @@ void staticMapUpdate()
     }
   }
   auto after = std::chrono::high_resolution_clock::now();
-  std::cout << std::chrono::duration_cast<std::chrono::microseconds>(after - before).count() << std::endl; 
+  return std::chrono::duration_cast<std::chrono::microseconds>(after - before).count(); 
 }
 
-void staticMapUpdateMultithread() 
+unsigned long int staticMapUpdateMultithread() 
 {
 
   uint8_t * costs_ = new uint8_t[SIZE_Y * SIZE_X];
@@ -142,9 +143,9 @@ void staticMapUpdateMultithread()
     unsigned int size_y = iterators_->size_y;
     unsigned int size_x = iterators_->size_x;
     
-    for (unsigned int i = 0; i < SIZE_Y; ++i) {
+    for (unsigned int i = size_x; i < size_y; ++i) {
     for (unsigned int j = 0; j < SIZE_X; ++j) {
-        unsigned char value;
+        unsigned char value = 255;
 
         if (true && value == 100) {
           value = 255;
@@ -156,18 +157,20 @@ void staticMapUpdateMultithread()
           value = 0;
         }
         costs_[index] = value;
-        ++index;
+        index++;
       }
     }
   }, THREAD_NUMBER); 
 
-  iterators *iterators_1 = new iterators(costs_, 0, 33); 
-  iterators *iterators_2 = new iterators(costs_, 33, 67);
-  iterators *iterators_3 = new iterators(costs_, 67, 100); 
+  iterators *iterators_1 = new iterators(costs_, 0, (SIZE_X /4) * 1); 
+  iterators *iterators_2 = new iterators(costs_, (SIZE_X /4) * 1, (SIZE_X /4) * 2);
+  iterators *iterators_3 = new iterators(costs_, (SIZE_X /4) * 2, (SIZE_X /4) * 3);
+  iterators *iterators_4 = new iterators(costs_, (SIZE_X /4) * 3, SIZE_X); 
 
   std::pair<staticmap_struct, iterators*> * p1 = new std::pair<staticmap_struct, iterators*>(settings_,iterators_1);
   std::pair<staticmap_struct, iterators*> * p2 = new std::pair<staticmap_struct, iterators*>(settings_,iterators_2);
   std::pair<staticmap_struct, iterators*> * p3 = new std::pair<staticmap_struct, iterators*>(settings_,iterators_3);
+  std::pair<staticmap_struct, iterators*> * p4 = new std::pair<staticmap_struct, iterators*>(settings_,iterators_4);
   
   auto before = std::chrono::high_resolution_clock::now();
   tasks[0] = p1;
@@ -176,18 +179,18 @@ void staticMapUpdateMultithread()
   
   tasks[2] = p3;
 
+  tasks[3] = p4;
+
   while(true) 
   {
-      if( tasks[0]->first.is_finished && tasks[1]->first.is_finished && tasks[2]->first.is_finished)
+      if(tasks[0]->first.is_finished && tasks[1]->first.is_finished && tasks[2]->first.is_finished && tasks[3]->first.is_finished)
       {
           break;
       }
   };
   auto after = std::chrono::high_resolution_clock::now();
 
-  std::cout << std::chrono::duration_cast<std::chrono::microseconds>(after-before).count() << std::endl;
-
-
+  return std::chrono::duration_cast<std::chrono::microseconds>(after-before).count();
 }
 
 void init_thread_pool() 
@@ -200,20 +203,20 @@ void init_thread_pool()
     cpu_set_t cpuset;
     int cpu_counter = 0;
 
-    for(int i = 0; i < 10; i++)
+    for(int i = 0; i < 5; i++)
     {
         int* arg = new int;
         *arg = i;
         tasks[i] = NULL;
         pthread_create(&threads[i], NULL, pool_thread_worker, (void*)arg);
-        pthread_setschedparam(*(threads + i),0, &sched_param_);
+      //  pthread_setschedparam(*(threads + i),0, &sched_param_);
         CPU_SET(cpu_counter, &cpuset);
         pthread_setaffinity_np(*(threads + i), sizeof(cpuset), &cpuset);
         CPU_CLR(cpu_counter, &cpuset);
         cpu_counter += 2;
     }
 
-    for(int i = 0; i < 10; i++)
+    for(int i = 0; i < 5; i++)
     {
         pthread_detach(threads[i]);
     }  

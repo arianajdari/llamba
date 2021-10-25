@@ -36,6 +36,9 @@ add_executable(staticmap_benchmark src/staticmap_benchmark.cpp)
 add_executable(forward_benchmark src/forward_benchmark.cpp)
 add_executable(inversion_benchmark src/inversion_benchmark.cpp)
 add_executable(grayscale_benchmark src/grayscale_benchmark.cpp)
+add_executable(blue_channel_extraction src/blue_channel_extraction.cpp)
+
+
 
 add_executable(multiply_parallel_test tests/multiply_parallel_test.cpp)
 add_executable(sum_parallel_test tests/sum_parallel_test.cpp)
@@ -132,6 +135,10 @@ target_include_directories(grayscale_benchmark PUBLIC include)
 target_link_libraries(grayscale_benchmark   "${OpenMP_CXX_FLAGS}" Eigen3::Eigen)
 target_compile_options(grayscale_benchmark PUBLIC  "${OpenMP_CXX_FLAGS}")
 
+target_include_directories(blue_channel_extraction PUBLIC include)
+target_link_libraries(blue_channel_extraction   "${OpenMP_CXX_FLAGS}" Eigen3::Eigen)
+target_compile_options(blue_channel_extraction PUBLIC  "${OpenMP_CXX_FLAGS}")
+
 target_include_directories(ros_benchmarks PUBLIC include)
 target_link_libraries(ros_benchmarks   "${OpenMP_CXX_FLAGS}" Eigen3::Eigen)
 target_compile_options(ros_benchmarks PUBLIC  "${OpenMP_CXX_FLAGS}")
@@ -160,6 +167,7 @@ install(TARGETS
   forward_benchmark
   inversion_benchmark
   grayscale_benchmark
+  blue_channel_extraction
   DESTINATION lib/${PROJECT_NAME}
 )
 

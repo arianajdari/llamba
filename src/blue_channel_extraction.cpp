@@ -9,7 +9,7 @@
 #include <thread>
 #include <mutex>
 #include <sched.h>
-#include <llamba/base/grayscale_parallel.hpp>
+#include <llamba/base/blue_channel_parallel.hpp>
 #include <llamba/generators/single_generator.hpp>
 
 #include "Eigen/Dense"
@@ -135,9 +135,10 @@ unsigned long int grayscale_pool_thread()
         {
             for(int j = 0; j < iterators_->width; j++)
             {
-                iterators_->matrix_c[i * iterators_->width + j] = ( ((iterators_->matrix_a[i * iterators_->width + j])&0x000000FF) + ((iterators_->matrix_a[i * iterators_->width + j] >> 8)&0x000000FF) + ((iterators_->matrix_a[i * iterators_->width + j] >> 16)&0x000000FF) ) / 3;
+                iterators_->matrix_c[i * iterators_->width + j] = (iterators_->matrix_a[i * iterators_->width + j] >> 16) & 0x000000FF;
             }
         }
+        
         
     }, THREAD_NUMBER_);
 
@@ -208,7 +209,7 @@ void grayscale_eigen(Eigen::VectorXi & vec)
 {
     for(int i = 0; i < DATA_SIZE * DATA_SIZE; i++)
     {
-        vec(i) = ((vec(i)&0x000000FF) + ((vec(i) >> 8 )&0x000000FF) + ((vec(i) >> 16 )&0x000000FF)) / 3;
+        vec(i) = (vec(i) >> 16) & 0x000000FF;
     }
 }
 
@@ -318,7 +319,7 @@ int main()
     {
         auto result  = llamba::single_generator::generate_input_zero<DATA_TYPE>(DATA_SIZE);
         auto before = std::chrono::high_resolution_clock::now();
-        llamba::base::grayscale_parallel<DATA_TYPE> grayscale = llamba::base::grayscale_parallel<DATA_TYPE>(matrix_a, matrix_b, result, settings_serial);
+        llamba::base::blue_channel_parallel<DATA_TYPE> grayscale = llamba::base::blue_channel_parallel<DATA_TYPE>(matrix_a, matrix_b, result, settings_serial);
         auto after = std::chrono::high_resolution_clock::now();
         serial_times.push_back(std::chrono::duration_cast<std::chrono::duration<int64_t, TIME_MEASUREMENT > >(after - before).count());
     }
@@ -329,7 +330,7 @@ int main()
     {
         auto result  = llamba::single_generator::generate_input_zero<DATA_TYPE>(DATA_SIZE);
         auto before = std::chrono::high_resolution_clock::now();
-        llamba::base::grayscale_parallel<DATA_TYPE> grayscale = llamba::base::grayscale_parallel<DATA_TYPE>(matrix_a, matrix_b, result, settings_standard);
+        llamba::base::blue_channel_parallel<DATA_TYPE> grayscale = llamba::base::blue_channel_parallel<DATA_TYPE>(matrix_a, matrix_b, result, settings_standard);
         auto after = std::chrono::high_resolution_clock::now();
         llamba_times_standard.push_back(std::chrono::duration_cast<std::chrono::duration<int64_t, TIME_MEASUREMENT > >(after - before).count());
     }
@@ -340,7 +341,7 @@ int main()
     {
         auto result  = llamba::single_generator::generate_input_zero<DATA_TYPE>(DATA_SIZE);
         auto before = std::chrono::high_resolution_clock::now();
-        llamba::base::grayscale_parallel<DATA_TYPE> grayscale = llamba::base::grayscale_parallel<DATA_TYPE>(matrix_a, matrix_b, result, settings_affinity);
+        llamba::base::blue_channel_parallel<DATA_TYPE> grayscale = llamba::base::blue_channel_parallel<DATA_TYPE>(matrix_a, matrix_b, result, settings_affinity);
         auto after = std::chrono::high_resolution_clock::now();
         llamba_times_affinity.push_back(std::chrono::duration_cast<std::chrono::duration<int64_t, TIME_MEASUREMENT > >(after - before).count());
     }
@@ -351,7 +352,7 @@ int main()
     {
         auto result  = llamba::single_generator::generate_input_zero<DATA_TYPE>(DATA_SIZE);
         auto before = std::chrono::high_resolution_clock::now();
-        llamba::base::grayscale_parallel<DATA_TYPE> grayscale = llamba::base::grayscale_parallel<DATA_TYPE>(matrix_a, matrix_b, result, settings_priority);
+        llamba::base::blue_channel_parallel<DATA_TYPE> grayscale = llamba::base::blue_channel_parallel<DATA_TYPE>(matrix_a, matrix_b, result, settings_priority);
         auto after = std::chrono::high_resolution_clock::now();
         llamba_times_priority.push_back(std::chrono::duration_cast<std::chrono::duration<int64_t, TIME_MEASUREMENT > >(after - before).count());
     }
@@ -362,7 +363,7 @@ int main()
     {
         auto result  = llamba::single_generator::generate_input_zero<DATA_TYPE>(DATA_SIZE);
         auto before = std::chrono::high_resolution_clock::now();
-        llamba::base::grayscale_parallel<DATA_TYPE> grayscale = llamba::base::grayscale_parallel<DATA_TYPE>(matrix_a, matrix_b, result, settings_affinity_priority);
+        llamba::base::blue_channel_parallel<DATA_TYPE> grayscale = llamba::base::blue_channel_parallel<DATA_TYPE>(matrix_a, matrix_b, result, settings_affinity_priority);
         auto after = std::chrono::high_resolution_clock::now();
         llamba_times_affinity_priority.push_back(std::chrono::duration_cast<std::chrono::duration<int64_t, TIME_MEASUREMENT > >(after - before).count());
     }
@@ -373,7 +374,7 @@ int main()
     {
         auto result  = llamba::single_generator::generate_input_zero<DATA_TYPE>(DATA_SIZE);
         auto before = std::chrono::high_resolution_clock::now();
-        llamba::base::grayscale_parallel<DATA_TYPE> grayscale = llamba::base::grayscale_parallel<DATA_TYPE>(matrix_a, matrix_b, result, settings_openmp);
+        llamba::base::blue_channel_parallel<DATA_TYPE> grayscale = llamba::base::blue_channel_parallel<DATA_TYPE>(matrix_a, matrix_b, result, settings_openmp);
         auto after = std::chrono::high_resolution_clock::now();
         openmp_times.push_back(std::chrono::duration_cast<std::chrono::duration<int64_t, TIME_MEASUREMENT > >(after - before).count());
     }

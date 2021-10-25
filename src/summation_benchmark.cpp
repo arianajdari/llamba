@@ -11,7 +11,7 @@
 
 #include "Eigen/Dense"
 
-#define DATA_SIZE 8000
+#define DATA_SIZE 4000
 #define ITERATION_NUMBER 5
 
 #define THREAD_POOL 4

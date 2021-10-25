@@ -36,11 +36,11 @@ int main()
     times.clear();
 
     for(int i = 0; i < 10; i++) {
-        times.push_back(llamba::algorithm::bresenham_multithreading(0,0,0, STEP_FOUR, 30, 62));
+        times.push_back(llamba::algorithm::bresenham_multithreading(0,0,0, STEP_THREE, 30, 62));
         std::this_thread::sleep_for(std::chrono::operator""ms(500));
     }
 
-    llamba::algorithm::calculate(times, STEP_FOUR, "Multi Threaded");
+    llamba::algorithm::calculate(times, STEP_THREE, "Multi Threaded");
     times.clear();
 
     for(int i = 0; i < 10; i++) {
