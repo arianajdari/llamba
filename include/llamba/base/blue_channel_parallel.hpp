@@ -48,7 +48,7 @@ void blue_channel_parallel_openmp(const std::vector<T>& matrix_a_, const std::ve
 }
 
 template<typename T>
-void blue_channel_serial(const std::vector<T>& matrix_a_, const std::vector<T>& matrix_b_, std::vector<T>& matrix_c_, const settings & settings_ )
+void blue_channel_serial(const std::vector<T>& matrix_a_, const std::vector<T>& matrix_b_, std::vector<T>& matrix_c_)
 {
 
 	int matrix_delimeter = sqrt(matrix_a_.size());
@@ -130,7 +130,7 @@ class blue_channel_parallel : public base_parallel<T>
             }
             else 
             {
-                blue_channel_serial<T>(matrix_a_,matrix_b_, matrix_c_, settings_);
+                blue_channel_serial<T>(matrix_a_,matrix_b_, matrix_c_);
             }
             
         }

@@ -193,7 +193,7 @@ unsigned long int staticMapUpdateMultithread()
   return std::chrono::duration_cast<std::chrono::microseconds>(after-before).count();
 }
 
-void init_thread_pool() 
+void init_thread_pool(int configuration) 
 {
     pthread_t threads[10];
 
@@ -209,11 +209,22 @@ void init_thread_pool()
         *arg = i;
         tasks[i] = NULL;
         pthread_create(&threads[i], NULL, pool_thread_worker, (void*)arg);
-      //  pthread_setschedparam(*(threads + i),0, &sched_param_);
-        CPU_SET(cpu_counter, &cpuset);
-        pthread_setaffinity_np(*(threads + i), sizeof(cpuset), &cpuset);
-        CPU_CLR(cpu_counter, &cpuset);
-        cpu_counter += 2;
+        if(configuration == 3) {
+          pthread_setschedparam(*(threads + i),0, &sched_param_);
+          CPU_SET(cpu_counter, &cpuset);
+          pthread_setaffinity_np(*(threads + i), sizeof(cpuset), &cpuset);
+          CPU_CLR(cpu_counter, &cpuset);
+          cpu_counter += 2;
+        } else if (configuration == 2) {
+          CPU_SET(cpu_counter, &cpuset);
+          pthread_setaffinity_np(*(threads + i), sizeof(cpuset), &cpuset);
+          CPU_CLR(cpu_counter, &cpuset);
+          cpu_counter += 2;
+        } else if (configuration == 1) {
+          pthread_setschedparam(*(threads + i),0, &sched_param_);
+        } else if (configuration == 0) {
+          continue;
+        }      
     }
 
     for(int i = 0; i < 5; i++)

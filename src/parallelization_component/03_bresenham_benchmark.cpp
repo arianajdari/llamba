@@ -10,13 +10,18 @@
 #define STEP_THREE  1500000000
 #define STEP_FOUR   2000000000
 
+#define LLAMBA_NO_CONFIGURATION 0
+#define LLAMBA_PRIORITY 1
+#define LLAMBA_AFFINITY 2
+#define LLAMBA_PRIORITY_AFFINITY 3
+
 int main()
 {
-    llamba::algorithm::init_thread_pool();
+    llamba::algorithm::init_thread_pool(LLAMBA_NO_CONFIGURATION);
     
     std::vector<double> times;
 
-    std::cout << "Starting benchmarks... times in nanoseconds" << std::endl << std::endl;
+    std::cout << "Starting benchmarks... times in milliseconds" << std::endl << std::endl;
 
     
     for(int i = 0; i < 10; i++) {
@@ -56,7 +61,6 @@ int main()
         std::this_thread::sleep_for(std::chrono::operator""ms(500));
     }
 
-
     llamba::algorithm::calculate(times, STEP_ONE, "Single Threaded");
     times.clear();
 
@@ -67,8 +71,6 @@ int main()
 
     llamba::algorithm::calculate(times, STEP_TWO, "Single Threaded");
     times.clear();
-
-
 
     for(int i = 0; i < 10; i++) {
         times.push_back(llamba::algorithm::bresenham_single_threaded(0,0,0, STEP_THREE, 30, 62));

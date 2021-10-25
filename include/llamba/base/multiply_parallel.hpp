@@ -60,7 +60,7 @@ void multiply_parallel_openmp(const std::vector<T>& matrix_a_, const std::vector
 }
 
 template<typename T>
-void multiply_serial(const std::vector<T>& matrix_a_, const std::vector<T>& matrix_b_, std::vector<T>& matrix_c_, const settings & settings_ )
+void multiply_serial(const std::vector<T>& matrix_a_, const std::vector<T>& matrix_b_, std::vector<T>& matrix_c_)
 {
     int matrix_delimeter = sqrt(matrix_a_.size());
     int boundary = matrix_a_.size() / sqrt(matrix_a_.size());
@@ -147,7 +147,7 @@ class multiply_parallel : public base_parallel<T>
             }
             else 
             {
-                multiply_serial(matrix_a_,matrix_b_, matrix_c_, settings_);
+                multiply_serial(matrix_a_,matrix_b_, matrix_c_);
             }
             
         }
