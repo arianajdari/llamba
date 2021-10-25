@@ -7,6 +7,11 @@
 
 #define ITERATION_NUMBER 5
 
+#define LLAMBA_NO_CONFIGURATION 0
+#define LLAMBA_PRIORITY 1
+#define LLAMBA_AFFINITY 2
+#define LLAMBA_PRIORITY_AFFINITY 3
+
 unsigned long int average(const std::vector<unsigned long int>& values, int iteration_number)
 {
     double average = 0.0;
@@ -43,11 +48,11 @@ unsigned long int min(const std::vector<unsigned long int>& values)
     return min;
 }
 
-
-
 int main() 
 {
-  llamba::algorithm::init_thread_pool();
+  llamba::algorithm::init_thread_pool(LLAMBA_NO_CONFIGURATION);
+
+  std::cout << "Starting benchmarks... times in microseconds" << std::endl << std::endl;
 
   std::vector<unsigned long int> single_threaded_times;
   std::vector<unsigned long int> multi_threaded_times;
@@ -67,9 +72,7 @@ int main()
   std::cout << "Serial times after " << ITERATION_NUMBER << " iterations: (min): " << min(single_threaded_times) << "micro (max): " << max(single_threaded_times)  << "micro (average): " << average(single_threaded_times, ITERATION_NUMBER) << "micro" << std::endl;
   std::cout << "Llamba times after " << ITERATION_NUMBER << " iterations: (min): " << min(multi_threaded_times) << "micro (max): " << max(multi_threaded_times)  << "micro (average): " << average(multi_threaded_times, ITERATION_NUMBER) << "mmicro" << std::endl;
 
-  while(true) {
-
-  }
+  while(true) { }
 
   return 0;
 }

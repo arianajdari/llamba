@@ -48,7 +48,7 @@ void grayscale_parallel_openmp(const std::vector<T>& matrix_a_, const std::vecto
 }
 
 template<typename T>
-void grayscale_serial(const std::vector<T>& matrix_a_, const std::vector<T>& matrix_b_, std::vector<T>& matrix_c_, const settings & settings_ )
+void grayscale_serial(const std::vector<T>& matrix_a_, const std::vector<T>& matrix_b_, std::vector<T>& matrix_c_)
 {
 
 	int matrix_delimeter = sqrt(matrix_a_.size());
@@ -130,7 +130,7 @@ class grayscale_parallel : public base_parallel<T>
             }
             else 
             {
-                grayscale_serial<T>(matrix_a_,matrix_b_, matrix_c_, settings_);
+                grayscale_serial<T>(matrix_a_,matrix_b_, matrix_c_);
             }
             
         }

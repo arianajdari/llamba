@@ -13,7 +13,7 @@
 #include <omp.h>
 
 
-#define THREAD_POOL 10
+#define THREAD_POOL 5
 #define THREAD_NUMBER 4
 
 typedef std::milli TIME_MEASUREMENT;
@@ -302,7 +302,7 @@ void calculate(std::vector<double>& times, const int & steps, const char * str)
 
 }
 
-void init_thread_pool()
+void init_thread_pool(int configuration)
 {
     struct sched_param  sched_param_;
     sched_param_.sched_priority = 80;
@@ -313,18 +313,28 @@ void init_thread_pool()
     
     pthread_t threads[THREAD_POOL];
 
-    for(int i = 0; i < THREAD_POOL; i++)
+    for(int i = 0; i < 5; i++)
     {
-        CPU_ZERO(&cpuset);
         int* arg = new int;
         *arg = i;
         tasks[i] = NULL;
         pthread_create(&threads[i], NULL, pool_thread_worker, (void*)arg);
-        CPU_SET(cpu_counter, &cpuset);
-       pthread_setaffinity_np(*(threads + i), sizeof(cpuset), &cpuset);        
-     //   pthread_setschedparam(*(threads + i),0, &sched_param_);
-        CPU_CLR(cpu_counter, &cpuset);
-        cpu_counter += 2;
+        if(configuration == 3) {
+          pthread_setschedparam(*(threads + i),0, &sched_param_);
+          CPU_SET(cpu_counter, &cpuset);
+          pthread_setaffinity_np(*(threads + i), sizeof(cpuset), &cpuset);
+          CPU_CLR(cpu_counter, &cpuset);
+          cpu_counter += 2;
+        } else if (configuration == 2) {
+          CPU_SET(cpu_counter, &cpuset);
+          pthread_setaffinity_np(*(threads + i), sizeof(cpuset), &cpuset);
+          CPU_CLR(cpu_counter, &cpuset);
+          cpu_counter += 2;
+        } else if (configuration == 1) {
+          pthread_setschedparam(*(threads + i),0, &sched_param_);
+        } else if (configuration == 0) {
+          continue;
+        }      
     }
 
     for(int i = 0; i < THREAD_POOL; i++)

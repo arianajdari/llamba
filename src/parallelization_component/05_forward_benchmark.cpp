@@ -3,13 +3,20 @@
 #include <thread>
 #include <vector>
 
+#define LLAMBA_NO_CONFIGURATION 0
+#define LLAMBA_PRIORITY 1
+#define LLAMBA_AFFINITY 2
+#define LLAMBA_PRIORITY_AFFINITY 3
+
 #include <llamba/algorithms/forward.hpp>
 
 #include "Eigen/Dense"
 
 int main()
 {
-    llamba::algorithm::init_thread_pool();
+    llamba::algorithm::init_thread_pool(LLAMBA_NO_CONFIGURATION);
+
+    std::cout << "Starting benchmarks... times in microseconds" << std::endl << std::endl;
 
     std::vector<unsigned long int> times;
 
