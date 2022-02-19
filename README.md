@@ -16,6 +16,10 @@ Before executing the file, check the comments inside benchmarks.py and decide wh
  $ python3 benchmarks.py
 ```
 
+## Viewing of Benchmarks
+
+If you would like to view the benchmarks without running the tests, head to measurements folder.
+
 ## Usage of LLAMBA
 
 Since LLAMBA is a header only library, it is enough to include its headers in the project. After including them, create a .cpp file and paste the following code:
